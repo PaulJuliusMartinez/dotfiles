@@ -12,20 +12,8 @@ let maplocalleader=","
 " compensate by introducing a speedy alternative...
 noremap ,. ,
 
-" Automatically Install Vundle if needed: --------------------------------- {{{
-" From http://www.erikzaadi.com/2012/03/19/auto-installing-vundle-from-your-vimrc/
-let iCanHazVundle=1
-let vundle_readme=expand('~/.vim/bundle/vundle/README.md')
-if !filereadable(vundle_readme)
-  echo "Installing Vundle.."
-  echo ""
-  silent !mkdir -p ~/.vim/bundle
-  silent !git clone https://github.com/gmarik/vundle ~/.vim/bundle/vundle
-  let iCanHazVundle=0
-endif
 set rtp+=~/.vim/bundle/vundle
 call vundle#rc()
-" ------------------------------------------------------------------------- }}}
 
 " Vundle and Bundles! ----------------------------------------------------- {{{
 " Let Vundle manage Vundle, required!
@@ -33,39 +21,53 @@ Bundle 'gmarik/vundle'
 
 " Bundles! Mostly copied from the Vundle README.
 
-" Why do I want this
-" Bundle 'Syntastic'
+" Syntastic
+Bundle 'scrooloose/syntastic'
 
 " You Complete Me
 Bundle 'Valloric/YouCompleteMe'
 
 " Tim Pope
-Bundle 'tpope/vim-fugitive'
+" Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 
 " Solarized colorscheme
 Bundle 'altercation/vim-colors-solarized'
 
+" Snippets
+" Bundle 'SirVer/ultisnips'
+
+" Ag, code searching
+Bundle 'rking/ag.vim'
+
 " LaTeX
 Bundle 'LaTeX-Box-Team/LaTeX-Box'
-" ------------------------------------------------------------------------- }}}
-
-" If Vundle was just installed, install the Bundles ----------------------- {{{
-if iCanHazVundle == 0
-  echo "Installing Bundles, please ignore key map error messages"
-  echo ""
-  :BundleInstall
-endif
 " ------------------------------------------------------------------------- }}}
 
 " Now we turn this on!
 filetype plugin indent on
 
-" Git and Fugitive -------------------------------------------------------- {{{
-" ,gs for git status
-nnoremap <Leader>gs :Gstatus<CR>
-" ------------------------------------------------------------------------- }}}
+"" UltiSnips and YouCompleteMe  -------------------------------------------- {{{
+"function! g:UltiSnips_Complete()
+    "call UltiSnips_ExpandSnippet()
+    "if g:ulti_expand_res == 0
+        "if pumvisible()
+            "return "\<C-n>"
+        "else
+            "call UltiSnips_JumpForwards()
+            "if g:ulti_jump_forwards_res == 0
+               "return "\<TAB>"
+            "endif
+        "endif
+    "endif
+    "return ""
+"endfunction
+
+"au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+"let g:UltiSnipsJumpForwardTrigger="<tab>"
+"let g:UltiSnipsListSnippets="<c-e>"
+"" ------------------------------------------------------------------------- }}}
 
 " Opening files, editing files, etc. -------------------------------------- {{{
 " Show navigable menu for tab completion.
@@ -81,6 +83,15 @@ augroup filetype_vim
 augroup END
 " ------------------------------------------------------------------------- }}}
 
+" TeX file settings ------------------------------------------------------- {{{
+augroup filetype_tex
+  autocmd!
+  autocmd FileType tex noremap <Leader>ct :Latexmk<CR>
+  autocmd FileType tex nnoremap j gj
+  autocmd FileType tex nnoremap k gk
+augroup END
+" ------------------------------------------------------------------------- }}}
+
 " Some basic settings for simple formatting, mainly tabs ------------------ {{{
 
 " Get backspace to behave sanely
@@ -93,7 +104,7 @@ set mouse=nicr
 " Experience shows: tabs *occasionally* cause problems; spaces *never* do.
 " Besides, vim is smart enough to make it "feel like" real tabs.
 " tabstop is 8 so it's REALLY obvious when there are tabs.
-set tabstop=8 softtabstop=2 shiftwidth=2 expandtab smarttab
+set tabstop=4 softtabstop=2 shiftwidth=2 expandtab smarttab
 
 " Soft-wrapping is more readable than scrolling...
 set wrap
@@ -117,7 +128,7 @@ set textwidth=80
 
 " ------------------------------------------------------------------------- }}}
 
-" Window management! ------------------------------------------------------ {{{
+" Window management and sessions! ----------------------------------------- {{{
 " Control + h/j/k/l to move windows in split screen
 noremap <C-h> <Esc><C-w>h
 noremap <C-j> <Esc><C-w>j
@@ -139,6 +150,10 @@ nnoremap <Leader>ob :set splitbelow<CR>:sp
 
 " Don't let vim change the setup when closing windows
 set noequalalways
+
+" Sessions
+map <Leader>ss :mksession! ~/.vim/vim_session <cr> " Quick write session with F2
+map <Leader>ls :source ~/.vim/vim_session <cr>     " And load session with F3
 " ------------------------------------------------------------------------- }}}
 
 " Tabs! :O --------------------------------------------------------------- {{{
@@ -150,38 +165,39 @@ nnoremap <Leader>nt :tabnew<CR>
 set laststatus=2          " ALWAYS display the status line!
 
 " Status line from fugitive help.
-set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
+" set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
 " I could do set ruler, but I think having the filetype is a nice touch.
 " set ruler
 
-"set statusline=%f         " Path to file
-"set statusline+=%3m       " Modified
-"set statusline+=\ -\      " Separator
-"" set statusline+=Filetype: " Label
-"set statusline+=%y        " Filetype
+set statusline=%f         " Path to file
+set statusline+=%3m       " Modified
+set statusline+=\ -\      " Separator
+" set statusline+=Filetype: " Label
+set statusline+=%y        " Filetype
 
-"set statusline+=%=        " Right side
-"set statusline+=%4l       " Current line
-"set statusline+=/         " Separator
-"set statusline+=%L        " Total lines
-"set statusline+=[%2c]     " Column number
-"set statusline+=\ %P      " Percent
+set statusline+=%=        " Right side
+set statusline+=%4l       " Current line
+set statusline+=/         " Separator
+set statusline+=%L        " Total lines
+set statusline+=[%2c]     " Column number
+set statusline+=\ %P      " Percent
 " ------------------------------------------------------------------------- }}}
 
 " Relative line numbers and toggling them --------------------------------- {{{
 " Set relative number as the default
 set relativenumber
+set number
 
-" Settings for line numbers
-function! NumberToggle()
-  if(&relativenumber == 1)
-    set number
-  else
-    set relativenumber
-  endif
-endfunc
+ "Settings for line numbers
+"function! NumberToggle()
+  "if(&relativenumber == 1)
+    "set number
+  "else
+    "set relativenumber
+  "endif
+"endfunc
 
-nnoremap <C-n> :call NumberToggle()<cr>
+"nnoremap <C-n> :call NumberToggle()<cr>
 
 augroup nice_numbers
   autocmd!
@@ -214,9 +230,11 @@ set pastetoggle=<F7>
 
 " Colorscheme, 80 columns and trailing whitespace ------------------------- {{{
 syntax enable
-set background=dark
-colorscheme solarized
+set background=light
+colorscheme Solarized
 let &colorcolumn = join(range(81, 300), ",")
+set cursorline
+set cursorcolumn
 
 " Highlight trailing whitespace, but not when I'm in insert mode.
 highlight trailingWhitespace ctermbg=red guibg=red
@@ -263,3 +281,4 @@ set vb t_vb=""
 " Leave a little space at the top and bottom.
 set scrolloff=3
 " ------------------------------------------------------------------------- }}}
+nnoremap <C-d> :sh<CR>
