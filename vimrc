@@ -27,12 +27,16 @@ Bundle 'scrooloose/syntastic'
 " You Complete Me
 Bundle 'Valloric/YouCompleteMe'
 
+" Omnisharp, separate from You Complete Me
+" Bundle 'nosami/Omnisharp'
+" Bundle 'tpope/vim-dispatch'
+
 " Tim Pope
 " Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-repeat'
 
-" Solarized colorscheme
+" Colorschemes
 Bundle 'altercation/vim-colors-solarized'
 
 " Snippets
@@ -48,40 +52,8 @@ Bundle 'LaTeX-Box-Team/LaTeX-Box'
 " Now we turn this on!
 filetype plugin indent on
 
-"" UltiSnips and YouCompleteMe  -------------------------------------------- {{{
-"function! g:UltiSnips_Complete()
-    "call UltiSnips_ExpandSnippet()
-    "if g:ulti_expand_res == 0
-        "if pumvisible()
-            "return "\<C-n>"
-        "else
-            "call UltiSnips_JumpForwards()
-            "if g:ulti_jump_forwards_res == 0
-               "return "\<TAB>"
-            "endif
-        "endif
-    "endif
-    "return ""
-"endfunction
-
-"au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
-"let g:UltiSnipsJumpForwardTrigger="<tab>"
-"let g:UltiSnipsListSnippets="<c-e>"
-"" ------------------------------------------------------------------------- }}}
-
-" Opening files, editing files, etc. -------------------------------------- {{{
-" Show navigable menu for tab completion.
-set wildmenu
-" Default is longest,full. List prints all the files in the directory to help.
-set wildmode=longest,full
-" ------------------------------------------------------------------------- }}}
-
-" Vimscript file settings ------------------------------------------------- {{{
-augroup filetype_vim
-  autocmd!
-  autocmd FileType vim setlocal foldmethod=marker
-augroup END
-" ------------------------------------------------------------------------- }}}
+" Detect file changes.
+set autoread
 
 " TeX file settings ------------------------------------------------------- {{{
 augroup filetype_tex
@@ -104,7 +76,7 @@ set mouse=nicr
 " Experience shows: tabs *occasionally* cause problems; spaces *never* do.
 " Besides, vim is smart enough to make it "feel like" real tabs.
 " tabstop is 8 so it's REALLY obvious when there are tabs.
-set tabstop=4 softtabstop=2 shiftwidth=2 expandtab smarttab
+set tabstop=4 softtabstop=4 shiftwidth=4 smarttab " expandtab 
 
 " Soft-wrapping is more readable than scrolling...
 set wrap
@@ -128,7 +100,52 @@ set textwidth=80
 
 " ------------------------------------------------------------------------- }}}
 
-" Window management and sessions! ----------------------------------------- {{{
+" Git and Fugitive -------------------------------------------------------- {{{
+" ,gs for git status
+" nnoremap <Leader>gs :Gstatus<CR>
+" ------------------------------------------------------------------------- }}}
+
+" Opening files, editing files, etc. -------------------------------------- {{{
+" Show navigable menu for tab completion.
+set wildmenu
+" Default is longest,full. List prints all the files in the directory to help.
+set wildmode=longest,full
+" Quick save, ,ww
+nnoremap <Leader>ww :w<CR>
+" ------------------------------------------------------------------------- }}}
+
+" Vimscript file settings ------------------------------------------------- {{{
+augroup filetype_vim
+  autocmd!
+  autocmd FileType vim setlocal foldmethod=marker
+augroup END
+" ------------------------------------------------------------------------- }}}
+
+" TeX file settings ------------------------------------------------------- {{{
+augroup filetype_tex
+  autocmd!
+  autocmd FileType tex noremap <Leader>ct :Latexmk<CR>
+  autocmd FileType tex nnoremap j gj
+  autocmd FileType tex nnoremap k gk
+augroup END
+" ------------------------------------------------------------------------- }}}
+
+" Unity/C# File settings -------------------------------------------------- {{{
+augroup filetype_csharp
+  autocmd!
+  autocmd BufRead *.cs set tabstop=4
+  autocmd BufRead *.cs set shiftwidth=4
+  autocmd BufRead *.cs set noexpandtab
+  autocmd BufRead *.cs nnoremap <leader>gd :YcmCompleter GoToDeclaration<CR>
+augroup END
+
+nnoremap <leader>br <C-O><CR>:set splitright<CR>:vert sb 
+nnoremap <leader>bl <C-O><CR>:set nosplitright<CR>:vert sb 
+nnoremap <leader>ba <C-O><CR>:set nosplitbelow<CR>:sb 
+nnoremap <leader>bb <C-O><CR>:set splitbelow<CR>:sb 
+" ------------------------------------------------------------------------- }}}
+
+" Window management! ------------------------------------------------------ {{{
 " Control + h/j/k/l to move windows in split screen
 noremap <C-h> <Esc><C-w>h
 noremap <C-j> <Esc><C-w>j
@@ -161,11 +178,16 @@ map <Leader>ls :source ~/.vim/vim_session <cr>     " And load session with F3
 nnoremap <Leader>nt :tabnew<CR>
 " ------------------------------------------------------------------------- }}}
 
+" Shell access ----------------------------------------------------------- {{{
+" <CTRL-d> for quick shell
+nnoremap <C-d> <Esc>:sh<CR>
+" ------------------------------------------------------------------------- }}}
+
 " My status line! --------------------------------------------------------- {{{
 set laststatus=2          " ALWAYS display the status line!
 
 " Status line from fugitive help.
-" set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r\ %n%=%-14.(%l,%c%V%)\ %P
 " I could do set ruler, but I think having the filetype is a nice touch.
 " set ruler
 
@@ -231,10 +253,11 @@ set pastetoggle=<F7>
 " Colorscheme, 80 columns and trailing whitespace ------------------------- {{{
 syntax enable
 set background=light
-colorscheme Solarized
-let &colorcolumn = join(range(81, 300), ",")
+colorscheme solarized
+" let &colorcolumn = join(range(81, 300), ",")
 set cursorline
 set cursorcolumn
+map <leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 " Highlight trailing whitespace, but not when I'm in insert mode.
 highlight trailingWhitespace ctermbg=red guibg=red
