@@ -28,8 +28,8 @@ Bundle 'scrooloose/syntastic'
 Bundle 'Valloric/YouCompleteMe'
 
 " Omnisharp, separate from You Complete Me
-" Bundle 'nosami/Omnisharp'
-" Bundle 'tpope/vim-dispatch'
+Bundle 'nosami/Omnisharp'
+Bundle 'tpope/vim-dispatch'
 
 " Tim Pope
 " Bundle 'tpope/vim-fugitive'
@@ -40,7 +40,7 @@ Bundle 'tpope/vim-repeat'
 Bundle 'altercation/vim-colors-solarized'
 
 " Snippets
-" Bundle 'SirVer/ultisnips'
+Bundle 'SirVer/ultisnips'
 
 " Ag, code searching
 Bundle 'rking/ag.vim'
