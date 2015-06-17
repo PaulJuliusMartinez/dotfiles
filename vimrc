@@ -22,13 +22,13 @@ Bundle 'gmarik/vundle'
 " Bundles! Mostly copied from the Vundle README.
 
 " Syntastic
-Bundle 'scrooloose/syntastic'
+"Bundle 'scrooloose/syntastic'
 
 " You Complete Me
 Bundle 'Valloric/YouCompleteMe'
 
 " Omnisharp, separate from You Complete Me
-Bundle 'nosami/Omnisharp'
+"Bundle 'nosami/Omnisharp'
 Bundle 'tpope/vim-dispatch'
 
 " Tim Pope
@@ -47,6 +47,12 @@ Bundle 'rking/ag.vim'
 
 " LaTeX
 Bundle 'LaTeX-Box-Team/LaTeX-Box'
+
+" Control - P
+Bundle 'kien/ctrlp.vim'
+
+" Rust stuff
+Bundle 'wting/rust.vim'
 " ------------------------------------------------------------------------- }}}
 
 " Now we turn this on!
@@ -54,6 +60,10 @@ filetype plugin indent on
 
 " Detect file changes.
 set autoread
+
+" Python 4 space tabs ----------------------------------------------------- {{{
+autocmd FileType python setlocal expandtab softtabstop=4 shiftwidth=4
+" ------------------------------------------------------------------------- }}}
 
 " TeX file settings ------------------------------------------------------- {{{
 augroup filetype_tex
@@ -71,12 +81,12 @@ set backspace=indent,eol,start
 
 " Use the mouse. Usually people do 'set mouse=a', but then this makes clicking
 " and dragging enter visual mode, which I don't like. This prevents that.
-set mouse=nicr
+" set mouse=nicr
 
 " Experience shows: tabs *occasionally* cause problems; spaces *never* do.
 " Besides, vim is smart enough to make it "feel like" real tabs.
 " tabstop is 8 so it's REALLY obvious when there are tabs.
-set tabstop=4 softtabstop=4 shiftwidth=4 smarttab " expandtab 
+set tabstop=8 softtabstop=2 shiftwidth=2 smarttab expandtab 
 
 " Soft-wrapping is more readable than scrolling...
 set wrap
@@ -135,7 +145,6 @@ augroup filetype_csharp
   autocmd!
   autocmd BufRead *.cs set tabstop=4
   autocmd BufRead *.cs set shiftwidth=4
-  autocmd BufRead *.cs set noexpandtab
 augroup END
 
 nnoremap <leader>br <C-O><CR>:set splitright<CR>:vert sb
@@ -145,9 +154,12 @@ nnoremap <leader>bb <C-O><CR>:set splitbelow<CR>:sb
 " ------------------------------------------------------------------------- }}}
 
 " OmniSharp Settings ------------------------------------------------------ {{{
+
+" Ignore code issues!
+let g:ycm_enable_diagnostic_signs = 0
 " Copied from OmniSharp github page and modified slightly.
 "Timeout in seconds to wait for a response from the server
-let g:OmniSharp_timeout = 1
+let g:OmniSharp_timeout=4
 
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
@@ -194,7 +206,7 @@ nnoremap <leader>fu :OmniSharpFindUsages<cr>
 " nnoremap <leader>dc :OmniSharpDocumentation<cr>
 
 "show type information automatically when the cursor stops moving
-autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+" autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 " this setting controls how long to pause (in ms) before fetching type / symbol information.
 set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
@@ -232,6 +244,9 @@ noremap <C-j> <Esc><C-w>j
 noremap <C-k> <Esc><C-w>k
 noremap <C-l> <Esc><C-w>l
 
+"nnoremap <C-[> gT
+nnoremap <C-]> gt
+
 " Set the size of a window quickly for 80 columns or 100 columns.
 nnoremap <Leader>rs :vertical resize 84<CR>
 nnoremap <Leader>rS :vertical resize 104<CR>
@@ -239,9 +254,9 @@ nnoremap <Leader>rS :vertical resize 104<CR>
 " Shortcuts for opening files relative the the current one,
 " splitright as default
 set splitright
-nnoremap <Leader>or :set splitright<CR>:84vs
-nnoremap <Leader>oo :set splitright<CR>:84vs
-nnoremap <Leader>ol :set nosplitright<CR>:84vs
+nnoremap <Leader>or :set splitright<CR>:vs
+nnoremap <Leader>oo :set splitright<CR>:vs
+nnoremap <Leader>ol :set nosplitright<CR>:vs
 nnoremap <Leader>oa :set nosplitbelow<CR>:sp
 nnoremap <Leader>ob :set splitbelow<CR>:sp
 
@@ -249,13 +264,17 @@ nnoremap <Leader>ob :set splitbelow<CR>:sp
 set noequalalways
 
 " Sessions
-map <Leader>ss :mksession! ~/.vim/vim_session <cr> " Quick write session with F2
-map <Leader>ls :source ~/.vim/vim_session <cr>     " And load session with F3
+" Quick write session with F2
+map <Leader>ss :mksession! ~/.vim/vim_session <CR>
+map <Leader>ls :source ~/.vim/vim_session <CR>
+" And load session with F3
 " ------------------------------------------------------------------------- }}}
 
 " Tabs! :O --------------------------------------------------------------- {{{
 " ,nt for new tab
-nnoremap <Leader>nt :tabnew<CR>
+nnoremap <C-n> :tabnew<CR>
+nnoremap L :tabnext<CR>
+nnoremap H :tabprevious<CR>
 " ------------------------------------------------------------------------- }}}
 
 " Shell access ----------------------------------------------------------- {{{
@@ -303,10 +322,10 @@ set number
 
 augroup nice_numbers
   autocmd!
-  autocmd FocusLost * :set number
+  autocmd FocusLost * :set norelativenumber
   autocmd FocusGained * :set relativenumber
 
-  autocmd InsertEnter * :set number
+  autocmd InsertEnter * :set norelativenumber
   autocmd InsertLeave * :set relativenumber
 augroup END
 " ------------------------------------------------------------------------- }}}
@@ -332,9 +351,9 @@ set pastetoggle=<F7>
 
 " Colorscheme, 80 columns and trailing whitespace ------------------------- {{{
 syntax enable
-set background=light
+set background=dark
 colorscheme solarized
-" let &colorcolumn = join(range(81, 300), ",")
+let &colorcolumn = join(range(81, 300), ",")
 set cursorline
 set cursorcolumn
 map <leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
@@ -346,18 +365,24 @@ augroup trailing_whitespace
   autocmd InsertEnter * match trailingWhitespace /\s\+\%#\@<!$/
   autocmd InsertLeave * match trailingWhitespace /\s\+$/
 augroup END
+
+" Trim whitespace
+nnoremap <leader>ts mx :%s/\s\+$//g <CR> 'x
 " ------------------------------------------------------------------------- }}}
 
 " Miscellaneous ----------------------------------------------------------- {{{
 
-" Easier folding because "za" is hard as balls to type
+" Use Mac clipboard!
+set clipboard=unnamed
+
+" Easier folding because 'za' is hard as balls to type
 " ff is fold this one, fa is fold all, fo is open folds.
 nnoremap <Leader>ff za
 nnoremap <Leader>fa zm
 nnoremap <Leader>fo zR
 
 " jk instead of ESC
-inoremap jk <ESC>
+inoremap jk <ESC>:w<CR>
 " Also uu, because I usually type u when I hit the wrong 'o' or 'O'
 inoremap uu <ESC>
 
@@ -388,4 +413,9 @@ set scrolloff=3
 set ignorecase
 set smartcase
 " ------------------------------------------------------------------------- }}}
-nnoremap <C-d> :sh<CR>
+"
+" Ctrl-p preferences ------------------------------------------------------ {{{
+let g:ctrlp_custom_ignore = {
+	\ 'file': '\v\.(meta|swp|swo)$',
+	\ }
+" ------------------------------------------------------------------------- }}}
