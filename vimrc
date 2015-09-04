@@ -6,54 +6,43 @@ filetype off
 
 " Make sure this goes at the top!
 " ' ' is easy to type, so use it for <Leader> to make compound commands easier:
-let mapleader=","
-let maplocalleader=","
+let mapleader=" "
+let maplocalleader=" "
 " Unfortunately, this introduces a delay for the ',' command.  Let's
 " compensate by introducing a speedy alternative...
 noremap ,. ,
 
-set rtp+=~/.vim/bundle/vundle
-call vundle#rc()
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
 
 " Vundle and Bundles! ----------------------------------------------------- {{{
 " Let Vundle manage Vundle, required!
-Bundle 'gmarik/vundle'
+Plugin 'gmarik/Vundle.vim'
 
 " Bundles! Mostly copied from the Vundle README.
 
-" Syntastic
-"Bundle 'scrooloose/syntastic'
-
 " You Complete Me
-Bundle 'Valloric/YouCompleteMe'
-
-" Omnisharp, separate from You Complete Me
-"Bundle 'nosami/Omnisharp'
-Bundle 'tpope/vim-dispatch'
+Plugin 'Valloric/YouCompleteMe'
 
 " Tim Pope
-" Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-surround'
-Bundle 'tpope/vim-repeat'
+" Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-repeat'
 
 " Colorschemes
-Bundle 'altercation/vim-colors-solarized'
-
-" Snippets
-Bundle 'SirVer/ultisnips'
-
-" Ag, code searching
-Bundle 'rking/ag.vim'
-
-" LaTeX
-Bundle 'LaTeX-Box-Team/LaTeX-Box'
+Plugin 'altercation/vim-colors-solarized'
 
 " Control - P
-Bundle 'kien/ctrlp.vim'
+" Plugin 'kien/ctrlp.vim'
 
-" Rust stuff
-Bundle 'wting/rust.vim'
+" Tmux!
+Plugin 'christoomey/vim-tmux-navigator'
+
+" Coffeescript (Gross!)
+Plugin 'kchmck/vim-coffee-script'
 " ------------------------------------------------------------------------- }}}
+
+call vundle#end()
 
 " Now we turn this on!
 filetype plugin indent on
@@ -61,8 +50,18 @@ filetype plugin indent on
 " Detect file changes.
 set autoread
 
-" Python 4 space tabs ----------------------------------------------------- {{{
+" 4 space tabs for some languages ----------------------------------------- {{{
 autocmd FileType python setlocal expandtab softtabstop=4 shiftwidth=4
+autocmd FileType javascript setlocal expandtab softtabstop=4 shiftwidth=4
+" ------------------------------------------------------------------------- }}}
+
+" Java Stuff -------------------------------------------------------------- {{{
+autocmd FileType java setlocal expandtab softtabstop=4 shiftwidth=4
+
+" Eclim
+let g:EclimCompletionMethod='omnifunc'
+autocmd FileType java nnoremap gd :JavaSearch<CR>
+autocmd FileType java nnoremap <leader>ju :JUnit<CR>
 " ------------------------------------------------------------------------- }}}
 
 " TeX file settings ------------------------------------------------------- {{{
@@ -128,15 +127,6 @@ nnoremap <Leader>ww :w<CR>
 augroup filetype_vim
   autocmd!
   autocmd FileType vim setlocal foldmethod=marker
-augroup END
-" ------------------------------------------------------------------------- }}}
-
-" TeX file settings ------------------------------------------------------- {{{
-augroup filetype_tex
-  autocmd!
-  autocmd FileType tex noremap <Leader>ct :Latexmk<CR>
-  autocmd FileType tex nnoremap j gj
-  autocmd FileType tex nnoremap k gk
 augroup END
 " ------------------------------------------------------------------------- }}}
 
@@ -239,10 +229,12 @@ set hidden
 
 " Window management! ------------------------------------------------------ {{{
 " Control + h/j/k/l to move windows in split screen
-noremap <C-h> <Esc><C-w>h
-noremap <C-j> <Esc><C-w>j
-noremap <C-k> <Esc><C-w>k
-noremap <C-l> <Esc><C-w>l
+let g:tmux_navigator_no_mappings=1
+
+noremap <silent> <C-h> :TmuxNavigateLeft<CR>
+noremap <silent> <C-j> :TmuxNavigateDown<CR>
+noremap <silent> <C-k> :TmuxNavigateUp<CR>
+noremap <silent> <C-l> :TmuxNavigateRight<CR>
 
 "nnoremap <C-[> gT
 nnoremap <C-]> gt
@@ -264,10 +256,18 @@ nnoremap <Leader>ob :set splitbelow<CR>:sp
 set noequalalways
 
 " Sessions
-" Quick write session with F2
+" Delete hidden buffers (for before saving session)
+function DeleteHiddenBuffers()
+  let tpbl=[]
+  call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
+  for buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val)==-1')
+    silent execute 'bwipeout' buf
+  endfor
+endfunction
+
+map <Leader>dhb :call DeleteHiddenBuffers() <CR>
 map <Leader>ss :mksession! ~/.vim/vim_session <CR>
 map <Leader>ls :source ~/.vim/vim_session <CR>
-" And load session with F3
 " ------------------------------------------------------------------------- }}}
 
 " Tabs! :O --------------------------------------------------------------- {{{
@@ -353,7 +353,7 @@ set pastetoggle=<F7>
 syntax enable
 set background=dark
 colorscheme solarized
-let &colorcolumn = join(range(81, 300), ",")
+let &colorcolumn = join(range(101, 300), ",")
 set cursorline
 set cursorcolumn
 map <leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
@@ -382,7 +382,7 @@ nnoremap <Leader>fa zm
 nnoremap <Leader>fo zR
 
 " jk instead of ESC
-inoremap jk <ESC>:w<CR>
+inoremap jk <ESC>
 " Also uu, because I usually type u when I hit the wrong 'o' or 'O'
 inoremap uu <ESC>
 
@@ -412,10 +412,7 @@ set scrolloff=3
 " Case insensitive search, unless it starts with a capital letter.
 set ignorecase
 set smartcase
-" ------------------------------------------------------------------------- }}}
-"
-" Ctrl-p preferences ------------------------------------------------------ {{{
-let g:ctrlp_custom_ignore = {
-	\ 'file': '\v\.(meta|swp|swo)$',
-	\ }
+
+" Nice file navigation
+let g:netrw_liststyle=3
 " ------------------------------------------------------------------------- }}}
