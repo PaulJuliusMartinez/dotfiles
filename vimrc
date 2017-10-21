@@ -1,79 +1,277 @@
-" Many settings taken from github.com/chiphogg/dotfiles
+" Set <leader> at the very beginning.
+let mapleader=" "
+let maplocalleader=" "
 
-" Vundle setup!
+" Make this file readable.
+augroup filetype_vim
+  autocmd!
+  autocmd FileType vim setlocal foldmethod=marker
+augroup END
+
+set textwidth=90
+let &colorcolumn = join(range(91, 300), ",")
+
+""""""""""""""""""""""
+" Installing Plugins "
+""""""""""""""""""""""
+
+" {{{
+
+" Required by Vundle
 set nocompatible
 filetype off
 
-" Make sure this goes at the top!
-" ' ' is easy to type, so use it for <Leader> to make compound commands easier:
-let mapleader=" "
-let maplocalleader=" "
-" Unfortunately, this introduces a delay for the ',' command.  Let's
-" compensate by introducing a speedy alternative...
-noremap ,. ,
-
+" To install Vundle run:
+" git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
-" Vundle and Bundles! ----------------------------------------------------- {{{
-" Let Vundle manage Vundle, required!
+" Let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
-" Bundles! Mostly copied from the Vundle README.
-
-" You Complete Me
-Plugin 'Valloric/YouCompleteMe'
-
-" Tim Pope
-" Plugin 'tpope/vim-fugitive'
-" Plugin 'tpope/vim-surround'
-" Plugin 'tpope/vim-repeat'
-
 " Colorschemes
-Plugin 'altercation/vim-colors-solarized'
+Plugin 'morhetz/gruvbox'
+" Plugin 'altercation/vim-colors-solarized'
 
-" Control - P
-" Plugin 'kien/ctrlp.vim'
+" CtrlP
+Plugin 'ctrlpvim/ctrlp.vim'
 
 " Tmux!
 Plugin 'christoomey/vim-tmux-navigator'
 
-" LaTeX
-Plugin 'LaTeX-Box-Team/LaTeX-Box'
+" Swapping windows
+Plugin 'wesQ3/vim-windowswap'
+" Usage {{{
+"   <leader>ww to select a split, then <leader>ww again in a different split
+"   to swap them.
+" }}}
 
-" Go
-Plugin 'fatih/vim-go'
+" Rename files!
+Plugin 'danro/rename.vim'
+
+" Tim Pope things "
+Plugin 'tpope/vim-surround'
+" Usage {{{
+"   cs"' to replace double quotes with single quotes
+"   yss) to add ) around entire line
+"   { instead of } to add spaces inside
+"   use t for HTML tags
+" }}}
+
+Plugin 'tpope/tpope-vim-abolish'
+" Usage {{{
+"   cr{s,c,m,u,k,t} to switch to snake_case, lowerCamelCase, upperCamelCase,
+"   UPPER_CASE, kebab-case, and Title Case
+" }}}
+
+" Makes . work with above commands.
+Plugin 'tpope/vim-repeat'
+
+" YouCompleteMe
+Plugin 'Valloric/YouCompleteMe'
+
+" TypeScript auto-completion and syntax-highlighting support
+Plugin 'Quramy/tsuquyomi'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'ianks/vim-tsx'
 
 call vundle#end()
 
 " Now we turn this on!
 filetype plugin indent on
-" ------------------------------------------------------------------------- }}}
+
+" }}}
+
+"""""""""""""""""""
+" Plugin Settings "
+"""""""""""""""""""
+
+" YouCompleteMe {{{
+if !exists("g:ycm_semantic_triggers")
+   let g:ycm_semantic_triggers = {}
+endif
+let g:ycm_semantic_triggers['typescript'] = ['.']
+
+" Turn off for Ruby since it's laggy and doesn't help.
+let g:ycm_filetype_blacklist = { 'ruby': 1 }
+
+function! DisableYouCompleteForRubyFiles()
+  if exists("g:ycm_filetype_blacklist")
+    g:ycm_filetype_blacklist.ruby = 1
+  endif
+endfunc
+
+augroup disable_ycm_for_ruby
+  autocmd!
+  autocmd VimEnter * :call DisableYouCompleteForRubyFiles()
+augroup end
+" }}}
+
+" Tsuquyomi (Typescript) {{{
+let g:tsuquyomi_completion_detail = 1
+" }}}
+
+" CtrlP {{{
+if executable('ag')
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+end
+" }}}
+
+""""""""""""""
+" Appearance "
+""""""""""""""
+
+" {{{
+
+" Turn syntax highlighting on.
+syntax enable
+
+" Relative line numbers!
+set relativenumber
+set number
+
+" And switch between them in insert and normal mode.
+augroup nice_numbers
+  autocmd!
+  autocmd FocusLost * :set norelativenumber
+  autocmd FocusGained * :set relativenumber
+
+  autocmd InsertEnter * :set norelativenumber
+  autocmd InsertLeave * :set relativenumber
+augroup END
+
+" Make cursor more noticeable
+set cursorline
+set cursorcolumn
+" Default CursorLine is an underline, which I really don't like.
+" Make it use same highlighting as CursorColumn in default colorscheme.
+highlight! link CursorLine CursorColumn
+
+" Set colorscheme silently so there's no error message when it isn't installed.
+:silent! colorscheme gruvbox
+
+" Status line
+
+" ALWAYS display the status line!
+set laststatus=2
+
+set statusline=%f         " Path to file
+set statusline+=%3m       " Modified
+set statusline+=\ -\      " Separator
+set statusline+=%y        " Filetype
+
+set statusline+=%=        " Right side
+set statusline+=%4l       " Current line
+set statusline+=/         " Separator
+set statusline+=%L        " Total lines
+set statusline+=[%2c]     " Column number
+set statusline+=\ %P      " Percent
+
+" Disable the bell
+set vb t_vb=""
+
+" Leave a little space at the top and bottom.
+set scrolloff=3
+
+" Highlight trailing whitespace, but not when I'm in insert mode.
+highlight trailingWhitespace ctermbg=red guibg=red
+augroup trailing_whitespace
+  autocmd!
+  autocmd InsertEnter * match trailingWhitespace /\s\+\%#\@<!$/
+  autocmd InsertLeave * match trailingWhitespace /\s\+$/
+augroup END
+
+" Nice tree-style file navigation
+let g:netrw_liststyle=3
+
+" }}}
+
+"""""""""""""""""""""""""""""""""
+" Navigation & Split Management "
+"""""""""""""""""""""""""""""""""
+
+" {{{
+
+" Set this here so tmux navigator doesn't use it's own mappings if it's
+" loaded.
+let g:tmux_navigator_no_mappings=1
+" Don't navigate to other tmux panes when in full screen (<prefix>-z)
+let g:tmux_navigator_disable_when_zoomed = 1
+
+noremap <silent> <C-h> <C-w>h
+noremap <silent> <C-j> <C-w>j
+noremap <silent> <C-k> <C-w>k
+noremap <silent> <C-l> <C-w>l
+
+function! EnableTmuxMappings()
+  if exists("g:loaded_tmux_navigator")
+    noremap <silent> <C-h> :TmuxNavigateLeft<CR>
+    noremap <silent> <C-j> :TmuxNavigateDown<CR>
+    noremap <silent> <C-k> :TmuxNavigateUp<CR>
+    noremap <silent> <C-l> :TmuxNavigateRight<CR>
+  endif
+endfunc
+
+augroup enable_tmux
+  autocmd!
+  autocmd VimEnter * :call EnableTmuxMappings()
+augroup end
+
+" Shortcuts for opening files relative the the current one,
+" splitright as default
+set splitright
+nnoremap <Leader>or :set splitright<CR>:vs
+nnoremap <Leader>ol :set nosplitright<CR>:vs
+nnoremap <Leader>oa :set nosplitbelow<CR>:sp
+nnoremap <Leader>ob :set splitbelow<CR>:sp
+
+" Don't let vim change the setup when closing windows
+set noequalalways
+
+" I barely use tabs, but these are useful.
+nnoremap <C-n> :tabnew<CR>
+nnoremap L :tabnext<CR>
+nnoremap H :tabprevious<CR>
+
+" Easier navigation in command mode
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-p> <Up>
+cnoremap <C-n> <Down>
+cnoremap <C-b> <Left>
+cnoremap <C-f> <Right>
+
+" }}}
+
+"""""""""""""""""""
+" Editor behavior "
+"""""""""""""""""""
+
+" {{{
+
+" Use system clipboard
+set clipboard=unnamed
+
+" jk instead of ESC
+inoremap jk <ESC>
+
+" Map Y to yank to end of line.
+nnoremap Y y$
 
 " Detect file changes.
 set autoread
 
-" Some basic settings for simple formatting, mainly tabs ------------------ {{{
+" Case insensitive search, unless it starts with a capital letter.
+set ignorecase
+set smartcase
 
 " Get backspace to behave sanely
 set backspace=indent,eol,start
 
-" Use the mouse. Usually people do 'set mouse=a', but then this makes clicking
-" and dragging enter visual mode, which I don't like. This prevents that.
-" set mouse=nicr
+" Basic tab support
+set tabstop=8 softtabstop=2 shiftwidth=2 smarttab expandtab
 
-" Experience shows: tabs *occasionally* cause problems; spaces *never* do.
-" Besides, vim is smart enough to make it "feel like" real tabs.
-" tabstop is 8 so it's REALLY obvious when there are tabs.
-set tabstop=8 softtabstop=2 shiftwidth=2 smarttab expandtab 
-
-" Soft-wrapping is more readable than scrolling...
-set wrap
-" ...but don't break in the middle of a word!
-set linebreak
-
-" Almost every filetype is better with autoindent.
-" (Let filetype-specific settings handle the rest.)
+" Basic indentation support
 set autoindent
 
 " Format options (full list at ":help fo-table"; see also ":help 'fo'")
@@ -82,187 +280,35 @@ set formatoptions-=t  " Don't auto-wrap text, I'll do that.
 set formatoptions+=c  " ... but do handle comments for me.
 set formatoptions+=q  " Let me format comments manually.
 set formatoptions+=r  " Auto-continue comments if I'm still in insert mode,
-set formatoptions-=o  " but not if I'm coming from normal mode
+set formatoptions-=o  " but not if I'm coming from normal mode.
+set formatoptions+=j  " Delete comment characters when joining lines.
+set formatoptions+=n  " Recognize numbered lists and indent them properly.
 
-" Set columns max at 80.
-set textwidth=80
-
-" ------------------------------------------------------------------------- }}}
-
-" 4 space tabs for some languages ----------------------------------------- {{{
-autocmd FileType python setlocal expandtab softtabstop=4 shiftwidth=4
-autocmd FileType javascript setlocal expandtab softtabstop=4 shiftwidth=4
-autocmd FileType go setlocal noexpandtab softtabstop=4 shiftwidth=4 tabstop=4
-" ------------------------------------------------------------------------- }}}
-
-" Java Stuff -------------------------------------------------------------- {{{
-autocmd FileType java setlocal expandtab softtabstop=4 shiftwidth=4
-
-" Eclim
-let g:EclimCompletionMethod='omnifunc'
-autocmd FileType java nnoremap gd :JavaSearch<CR>
-autocmd FileType java nnoremap <leader>ju :JUnit<CR>
-" ------------------------------------------------------------------------- }}}
-
-" TeX file settings ------------------------------------------------------- {{{
-let g:LatexBox_custom_indent = 0
-augroup filetype_tex
-  autocmd!
-  autocmd FileType tex noremap <Leader>ct :Latexmk<CR>
-  autocmd FileType tex nnoremap j gj
-  autocmd FileType tex nnoremap k gk
-augroup END
-" ------------------------------------------------------------------------- }}}
-
-" Git and Fugitive -------------------------------------------------------- {{{
-" ,gs for git status
-" nnoremap <Leader>gs :Gstatus<CR>
-" ------------------------------------------------------------------------- }}}
-
-" Opening files, editing files, etc. -------------------------------------- {{{
-" Show navigable menu for tab completion.
+" Show navigable menu for tab completion when opening files.
 set wildmenu
-" Default is longest,full. List prints all the files in the directory to help.
 set wildmode=longest,full
-" Quick save, ,ww
-nnoremap <Leader>ww :w<CR>
-" ------------------------------------------------------------------------- }}}
+" }}}
 
-" Vimscript file settings ------------------------------------------------- {{{
-augroup filetype_vim
-  autocmd!
-  autocmd FileType vim setlocal foldmethod=marker
-augroup END
-" ------------------------------------------------------------------------- }}}
+"""""""""""""""""""
+" Useful Commands "
+"""""""""""""""""""
 
-" Unity/C# File settings -------------------------------------------------- {{{
-augroup filetype_csharp
-  autocmd!
-  autocmd BufRead *.cs set tabstop=4
-  autocmd BufRead *.cs set shiftwidth=4
-augroup END
+" {{{
 
-nnoremap <leader>br <C-O><CR>:set splitright<CR>:vert sb
-nnoremap <leader>bl <C-O><CR>:set nosplitright<CR>:vert sb
-nnoremap <leader>ba <C-O><CR>:set nosplitbelow<CR>:sb
-nnoremap <leader>bb <C-O><CR>:set splitbelow<CR>:sb
-" ------------------------------------------------------------------------- }}}
+" Trim whitespace
+nnoremap <leader>ts mx :%s/\s\+$//g <CR> 'x
 
-" OmniSharp Settings ------------------------------------------------------ {{{
+" Easy editing of .vimrc: ve to edit; vs to source, vv to source vertically.
+nnoremap <Leader>ve :split ~/.vimrc<CR>
+nnoremap <Leader>vv :vsplit ~/.vimrc<CR>
+nnoremap <Leader>vs :source ~/.vimrc<CR>
 
-" Ignore code issues!
-let g:ycm_enable_diagnostic_signs = 0
-" Copied from OmniSharp github page and modified slightly.
-"Timeout in seconds to wait for a response from the server
-let g:OmniSharp_timeout=4
+" Make a window into a scratch buffer
+nnoremap <Leader>sc :setlocal buftype=nofile<CR>:setlocal bufhidden=hide<CR>:setlocal noswapfile<CR>
 
-"Showmatch significantly slows down omnicomplete
-"when the first match contains parentheses.
-set noshowmatch
-"Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
-autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
-
-"Super tab settings
-"let g:SuperTabDefaultCompletionType = 'context'
-"let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
-"let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
-"let g:SuperTabClosePreviewOnPopupClose = 1
-
-"don't autoselect first item in omnicomplete, show if only one item (for preview)
-"remove preview if you don't want to see any documentation whatsoever.
-set completeopt=longest,menuone,preview
-" Fetch full documentation during omnicomplete requests.
-" There is a performance penalty with this (especially on Mono)
-" By default, only Type/Method signatures are fetched. Full documentation can still be fetched when
-" you need it with the :OmniSharpDocumentation command.
-" let g:omnicomplete_fetch_documentation=1
-
-"Move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
-"You might also want to look at the echodoc plugin
-set splitbelow
-
-" Synchronous build (blocks Vim)
-"autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
-" Builds can also run asynchronously with vim-dispatch installed
-autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
-
-"The following commands are contextual, based on the current cursor position.
-
-autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
-nnoremap <leader>fi :OmniSharpFindImplementations<cr>
-nnoremap <leader>ft :OmniSharpFindType<cr>
-nnoremap <leader>fs :OmniSharpFindSymbol<cr>
-nnoremap <leader>fu :OmniSharpFindUsages<cr>
-" cursor can be anywhere on the line containing an issue for this one
-" Not using these until I need to.
-" nnoremap <leader>x  :OmniSharpFixIssue<cr>
-" nnoremap <leader>fx :OmniSharpFixUsings<cr>
-" nnoremap <leader>tt :OmniSharpTypeLookup<cr>
-" nnoremap <leader>dc :OmniSharpDocumentation<cr>
-
-"show type information automatically when the cursor stops moving
-" autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
-" this setting controls how long to pause (in ms) before fetching type / symbol information.
-set updatetime=500
-" Remove 'Press Enter to continue' message when type information is longer than one line.
-set cmdheight=2
-
-" Contextual code actions (requires CtrlP)
-" nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
-" Run code actions with text selected in visual mode to extract method
-" vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
-
-" rename with dialog
-" nnoremap <leader>nm :OmniSharpRename<cr>
-" nnoremap <F2> :OmniSharpRename<cr>
-" rename without dialog - with cursor on the symbol to rename... ':Rename newname'
-" command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
-
-" Force OmniSharp to reload the solution. Useful when switching branches etc.
-nnoremap <leader>rl :OmniSharpReloadSolution<cr>
-nnoremap <leader>cf :OmniSharpCodeFormat<cr>
-" Load the current .cs file to the nearest project
-" nnoremap <leader>tp :OmniSharpAddToProject<cr>
-" Automatically add new cs files to the nearest project on save
-" autocmd BufWritePost *.cs call OmniSharp#AddToProject()
-
-" Add syntax highlighting for types and interfaces
-nnoremap <leader>th :OmniSharpHighlightTypes<cr>
-"Don't ask to save when changing buffers (i.e. when jumping to a type definition)
-set hidden
-" ------------------------------------------------------------------------- }}}
-
-" Window management! ------------------------------------------------------ {{{
-" Control + h/j/k/l to move windows in split screen
-let g:tmux_navigator_no_mappings=1
-
-noremap <silent> <C-h> :TmuxNavigateLeft<CR>
-noremap <silent> <C-j> :TmuxNavigateDown<CR>
-noremap <silent> <C-k> :TmuxNavigateUp<CR>
-noremap <silent> <C-l> :TmuxNavigateRight<CR>
-
-"nnoremap <C-[> gT
-nnoremap <C-]> gt
-
-" Set the size of a window quickly for 80 columns or 100 columns.
-nnoremap <Leader>rs :vertical resize 84<CR>
-nnoremap <Leader>rS :vertical resize 104<CR>
-
-" Shortcuts for opening files relative the the current one,
-" splitright as default
-set splitright
-nnoremap <Leader>or :set splitright<CR>:vs
-nnoremap <Leader>oo :set splitright<CR>:vs
-nnoremap <Leader>ol :set nosplitright<CR>:vs
-nnoremap <Leader>oa :set nosplitbelow<CR>:sp
-nnoremap <Leader>ob :set splitbelow<CR>:sp
-
-" Don't let vim change the setup when closing windows
-set noequalalways
-
-" Sessions
+" Nice support for native vim sessions
 " Delete hidden buffers (for before saving session)
-function DeleteHiddenBuffers()
+function! DeleteHiddenBuffers()
   let tpbl=[]
   call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
   for buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val)==-1')
@@ -273,151 +319,19 @@ endfunction
 map <Leader>dhb :call DeleteHiddenBuffers() <CR>
 map <Leader>ss :mksession! ~/.vim/vim_session <CR>
 map <Leader>ls :source ~/.vim/vim_session <CR>
-" ------------------------------------------------------------------------- }}}
 
-" Tabs! :O --------------------------------------------------------------- {{{
-" ,nt for new tab
-nnoremap <C-n> :tabnew<CR>
-nnoremap L :tabnext<CR>
-nnoremap H :tabprevious<CR>
-" ------------------------------------------------------------------------- }}}
-
-" Shell access ----------------------------------------------------------- {{{
-" <CTRL-d> for quick shell
+" <C-d> for quick shell
 nnoremap <C-d> <Esc>:sh<CR>
-" ------------------------------------------------------------------------- }}}
 
-" My status line! --------------------------------------------------------- {{{
-set laststatus=2          " ALWAYS display the status line!
-
-" Status line from fugitive help.
-set statusline=%<%f\ %h%m%r\ %n%=%-14.(%l,%c%V%)\ %P
-" I could do set ruler, but I think having the filetype is a nice touch.
-" set ruler
-
-set statusline=%f         " Path to file
-set statusline+=%3m       " Modified
-set statusline+=\ -\      " Separator
-" set statusline+=Filetype: " Label
-set statusline+=%y        " Filetype
-
-set statusline+=%=        " Right side
-set statusline+=%4l       " Current line
-set statusline+=/         " Separator
-set statusline+=%L        " Total lines
-set statusline+=[%2c]     " Column number
-set statusline+=\ %P      " Percent
-" ------------------------------------------------------------------------- }}}
-
-" Relative line numbers and toggling them --------------------------------- {{{
-" Set relative number as the default
-set relativenumber
-set number
-
- "Settings for line numbers
-"function! NumberToggle()
-  "if(&relativenumber == 1)
-    "set number
-  "else
-    "set relativenumber
-  "endif
-"endfunc
-
-"nnoremap <C-n> :call NumberToggle()<cr>
-
-augroup nice_numbers
-  autocmd!
-  autocmd FocusLost * :set norelativenumber
-  autocmd FocusGained * :set relativenumber
-
-  autocmd InsertEnter * :set norelativenumber
-  autocmd InsertLeave * :set relativenumber
-augroup END
-" ------------------------------------------------------------------------- }}}
-
-" Easy editing of .vimrc: ,ve to edit; ,vs to source ---------------------- {{{
-nnoremap <Leader>ve :split ~/.vimrc<CR>
-nnoremap <Leader>vv :vsplit ~/.vimrc<CR>
-nnoremap <Leader>vs :source ~/.vimrc<CR>
-" ------------------------------------------------------------------------- }}}
-
-" Easy paste mode toggling with <F7> -------------------------------------- {{{
-
+" Easy enabling of pasted mode.
 " Normal mode:
-nnoremap <silent> <F7> :call Paste_toggle()<CR>
-func! Paste_toggle()
+nnoremap <silent> <F7> :call TogglePasteMode()<CR>
+func! TogglePasteMode()
   set paste!
   echo "Paste mode: ".(&paste ? "ON" : "OFF")
 endfunc
 
 " Insert mode:
 set pastetoggle=<F7>
-" ------------------------------------------------------------------------- }}}
 
-" Colorscheme, 80 columns and trailing whitespace ------------------------- {{{
-syntax enable
-set background=dark
-colorscheme solarized
-let &colorcolumn = join(range(101, 300), ",")
-set cursorline
-set cursorcolumn
-map <leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
-
-" Highlight trailing whitespace, but not when I'm in insert mode.
-highlight trailingWhitespace ctermbg=red guibg=red
-augroup trailing_whitespace
-  autocmd!
-  autocmd InsertEnter * match trailingWhitespace /\s\+\%#\@<!$/
-  autocmd InsertLeave * match trailingWhitespace /\s\+$/
-augroup END
-
-" Trim whitespace
-nnoremap <leader>ts mx :%s/\s\+$//g <CR> 'x
-" ------------------------------------------------------------------------- }}}
-
-" Miscellaneous ----------------------------------------------------------- {{{
-
-" Use Mac clipboard!
-set clipboard=unnamed
-
-" Easier folding because 'za' is hard as balls to type
-" ff is fold this one, fa is fold all, fo is open folds.
-nnoremap <Leader>ff za
-nnoremap <Leader>fa zm
-nnoremap <Leader>fo zR
-
-" jk instead of ESC
-inoremap jk <ESC>
-" Also uu, because I usually type u when I hit the wrong 'o' or 'O'
-inoremap uu <ESC>
-
-" Map Y to yank to end of line.
-nnoremap Y y$
-
-" Easier navigation in command mode
-cnoremap <C-a> <Home>
-cnoremap <C-e> <End>
-cnoremap <C-p> <Up>
-cnoremap <C-n> <Down>
-cnoremap <C-b> <Left>
-cnoremap <C-f> <Right>
-
-" Jumping to marks: You usually always want to jump to the cursor position
-" (`), not the beginning of the line (').  But, the apostrophe is much more
-" conveniently located.  So, save your fingers and swap 'em!
-nnoremap ' `
-nnoremap ` '
-
-" Disable the bell
-set vb t_vb=""
-
-" Leave a little space at the top and bottom.
-set scrolloff=3
-
-" Case insensitive search, unless it starts with a capital letter.
-set ignorecase
-set smartcase
-
-" Nice file navigation
-let g:netrw_liststyle=3
-" ------------------------------------------------------------------------- }}}
+" }}}
