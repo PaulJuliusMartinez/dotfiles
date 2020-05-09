@@ -1,0 +1,106 @@
+# Things to do when setting up a new machine:
+# - Keyboard
+#   - Set Key Repeat and Delay Until Repeat settings to minimums
+#   - Change CapsLock to Control (on all keyboards)
+# - Trackpad
+#   - Increase tracking speed to max
+#   - Set secondary click to "Click in bottom right corner"
+# - Mouse
+#   - Increase tracking speed to max
+# - Dock
+#   - Automatically hide and show the Dock
+#   - Make Dock a bit smaller
+#   - Remove most applications from Dock
+# - Sound
+#   - Show volume in menu bar
+# - Menu Bar
+#   - Show Battery Percentage
+
+# Install homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+# Install Scroll Reverser
+brew cask install scroll-reverser
+
+# Install Chrome & Firefox
+brew cask install google-chrome
+brew cask install firefox
+
+# Install Spotify
+brew cask install spotify
+
+# Install iTerm2
+brew cask install iterm2
+
+# Install 1Password
+brew cask install 1password
+
+# Install Dropbox & link 1Password to stored vault
+brew cask install dropbox
+
+# Install Alfred
+brew cask install alfred
+
+# Install Slack
+brew cask install slack
+
+# Have to install via AppStore:
+# - Divvy
+
+# Install dev tools: neovim, tmux, ag, rg
+brew install neovim
+brew install tmux
+brew install ag
+brew install rg
+
+# After installing neovim, follow instructions here to install vim-plug:
+# https://github.com/junegunn/vim-plug#unix-1
+
+# Import gruvbox colorscheme into iTerm2
+# https://raw.githubusercontent.com/morhetz/gruvbox-contrib/master/iterm2/gruvbox-dark.itermcolors
+# Other iTerm2 settings to change:
+#   Appearance > Tabs > Show tab bar even when there is only one tab
+#   Appearance > Tabs > Stretch tabs to fill bar
+#   Edit > Selection Respects Soft Boundaries
+#   Profiles > Keys > Left Option key sends Esc+
+#     (This gets option j/k to move files up and down in vim.)
+
+# Install git completions for Bash:
+curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+
+# Ruby installation:
+brew install rbenv
+# Follow instructions outputted by:
+rbenv init
+
+# After restarting shell...
+
+# Install rbenv default gems, so we don't need to manually reinstall bundler
+# after upgrading Ruby versions.
+brew install rbenv-default-gems
+echo bundler >> $(rbenv root)/default-gems
+
+LATEST_RUBY_VERSION = 2.7.1
+rbenv install $LATEST_RUBY_VERSION
+rbenv global $LATEST_RUBY_VERSION
+
+# Add a SSH key for GitHub by following these directions:
+# https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+# https://help.github.com/en/github/authenticating-to-github/adding-a-new-ssh-key-to-your-github-account
+
+# Generate SSH Key
+ssh-keygen -t rsa -b 4096 -C pauljuliusmartinez@gmail.com
+# Start SSH Agent
+eval "$(ssh-agent -s)"
+# Add following contents to ~/.ssh/config:
+# Host *
+# AddKeysToAgent yes
+# UseKeychain yes
+# IdentityFile ~/.ssh/id_rsa
+# Add SSH key to SSH agent:
+ssh-add -K ~/.ssh/id_rsa
+
+# Then upload public key to GitHub.
+
+# Fetch dotfiles from GitHub:
+git clone git@github.com:PaulJuliusMartinez/dotfiles.git
