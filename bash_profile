@@ -15,10 +15,16 @@ fi
 # Python persistent history
 export PYTHONSTARTUP=~/.pystartup
 
-# Clear clear screen
+# Clear clear-screen
 stty -ixon
 bind -r \C-s
 bind \C-s:clear-screen
 
-# Go
-export GOPATH=$HOME/Dropbox/Developer/Go
+# Rust
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Ruby
+eval "$(rbenv init -)"
+
+# nvim
+alias vim=nvim
