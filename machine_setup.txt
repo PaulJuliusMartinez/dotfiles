@@ -68,6 +68,9 @@ brew install rg
 # Install git completions for Bash:
 curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
 
+# JavaScript stuff
+brew install yarn
+
 # Ruby installation:
 brew install rbenv
 # Follow instructions outputted by:
@@ -80,9 +83,17 @@ rbenv init
 brew install rbenv-default-gems
 echo bundler >> $(rbenv root)/default-gems
 
-LATEST_RUBY_VERSION = 2.7.1
+LATEST_RUBY_VERSION = 2.7.2
 rbenv install $LATEST_RUBY_VERSION
 rbenv global $LATEST_RUBY_VERSION
+
+# Install ruby-build to easily support newer Ruby versions
+# https://github.com/rbenv/ruby-build#readme
+brew install ruby-build
+mkdir -p "$(rbenv root)"/plugins
+git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+
+# Rust installation, see: https://www.rust-lang.org/tools/install
 
 # Add a SSH key for GitHub by following these directions:
 # https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
@@ -104,3 +115,10 @@ ssh-add -K ~/.ssh/id_rsa
 
 # Fetch dotfiles from GitHub:
 git clone git@github.com:PaulJuliusMartinez/dotfiles.git
+
+
+
+
+
+# Other useful apps:
+# PhotoScape X: http://x.photoscape.org/
