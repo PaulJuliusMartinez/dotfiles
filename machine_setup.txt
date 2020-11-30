@@ -90,8 +90,8 @@ rbenv global $LATEST_RUBY_VERSION
 # Install ruby-build to easily support newer Ruby versions
 # https://github.com/rbenv/ruby-build#readme
 brew install ruby-build
-mkdir -p "$(rbenv root)"/plugins
-git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+# To update ruby-build to get access to new Ruby versions do:
+brew update && brew upgrade ruby-build
 
 # Rust installation, see: https://www.rust-lang.org/tools/install
 
