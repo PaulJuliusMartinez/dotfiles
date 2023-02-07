@@ -20,29 +20,29 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
 # Install Scroll Reverser
-brew cask install scroll-reverser
+brew install --cask scroll-reverser
 
 # Install Chrome & Firefox
-brew cask install google-chrome
-brew cask install firefox
+brew install --cask google-chrome
+brew install --cask firefox
 
 # Install Spotify
-brew cask install spotify
+brew install --cask spotify
 
 # Install iTerm2
-brew cask install iterm2
+brew install --cask iterm2
 
 # Install 1Password
-brew cask install 1password
+brew install --cask 1password
 
 # Install Dropbox & link 1Password to stored vault
-brew cask install dropbox
+brew install --cask dropbox
 
 # Install Alfred
-brew cask install alfred
+brew install --cask alfred
 
 # Install Slack
-brew cask install slack
+brew install --cask slack
 
 # Have to install via AppStore:
 # - Divvy
@@ -63,7 +63,7 @@ brew install rg
 #   Appearance > Tabs > Stretch tabs to fill bar
 #   Edit > Selection Respects Soft Boundaries
 #   Profiles > Keys > Left Option key sends Esc+
-#     (This gets option j/k to move files up and down in vim.)
+#     (This gets option j/k to move lines up and down in vim.)
 
 # Install git completions for Bash:
 curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
